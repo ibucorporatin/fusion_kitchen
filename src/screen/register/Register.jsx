@@ -8,6 +8,8 @@ import CustomBanner from '../../globalComponents/CustomBanner';
 import CustomButton from '../../globalComponents/CustomButton';
 import {useFormik} from 'formik';
 import {REGISTER_SCHEMA} from './RegisterSchema';
+import { setIsLoggedIn } from '../../store/slices';
+import { useDispatch } from 'react-redux';
 const initialValues = {
   name: '',
   userName: '',
@@ -18,19 +20,19 @@ const initialValues = {
   confirmPassword: '',
 };
 const Register = () => {
+  const dispatch = useDispatch();
   const formik = useFormik({
     initialValues: initialValues,
     validationSchema: REGISTER_SCHEMA,
     onSubmit: async values => {
-      // Handle form submission here
-      console.log(values);
+      dispatch(setIsLoggedIn(true));
     },
   });
   return (
     <RootLayout>
-      <ScrollView>
+   
         <CustomHeader name="SIGN UP" />
-        <CustomBanner list={images} />
+        {/* <CustomBanner list={images} /> */}
         <View style={styles.inputContainer}>
           {/* Full Name Input */}
           <CustomInput
@@ -43,14 +45,14 @@ const Register = () => {
           />
 
           {/* Username Input */}
-          <CustomInput
+          {/* <CustomInput
             label="Username"
             placeholder="Create a username"
             value={formik.values.userName}
             onChangeText={formik.handleChange('userName')}
             onBlur={formik.handleBlur('userName')}
             error={formik.touched.userName && formik.errors.userName}
-          />
+          /> */}
 
           {/* Email Input */}
           <CustomInput
@@ -64,7 +66,7 @@ const Register = () => {
           />
 
           {/* Age Input */}
-          <CustomInput
+          {/* <CustomInput
             label="Age"
             placeholder="Enter your age"
             keyboardType="numeric"
@@ -72,10 +74,10 @@ const Register = () => {
             onChangeText={formik.handleChange('age')}
             onBlur={formik.handleBlur('age')}
             error={formik.touched.age && formik.errors.age}
-          />
+          /> */}
 
           {/* Password Input */}
-          <CustomInput
+          {/* <CustomInput
             label="Password"
             placeholder="Create your password"
             showPasswordToggle
@@ -83,10 +85,10 @@ const Register = () => {
             onChangeText={formik.handleChange('password')}
             onBlur={formik.handleBlur('password')}
             error={formik.touched.password && formik.errors.password}
-          />
+          /> */}
 
           {/* Confirm Password Input */}
-          <CustomInput
+          {/* <CustomInput
             label="Confirm password"
             placeholder="Enter your confirm password"
             showPasswordToggle
@@ -96,10 +98,10 @@ const Register = () => {
             error={
               formik.touched.confirmPassword && formik.errors.confirmPassword
             }
-          />
+          /> */}
           <CustomButton title="Register" onPress={formik.handleSubmit} />
         </View>
-      </ScrollView>
+      
     </RootLayout>
   );
 };
@@ -109,5 +111,7 @@ export default Register;
 const styles = StyleSheet.create({
   inputContainer: {
     marginHorizontal: '10%',
+flex: 1,
+justifyContent:"center"
   },
 });

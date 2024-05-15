@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "70178722889",
+    "project_id": "fusion-kitchen-66ba7",
+    "storage_bucket": "fusion-kitchen-66ba7.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:70178722889:android:0523980594a295c0c1db98",
+        "android_client_info": {
+          "package_name": "com.todo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCs2z8Z541qMIYMx-L4QF-kZLG8FYvspYk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

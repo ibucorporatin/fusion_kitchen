@@ -1,30 +1,44 @@
 import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import React from 'react';
+import React, {useRef} from 'react';
 import RootLayout from '../../globalComponents/RootLayout';
 import CustomHeader from '../../globalComponents/CustomHeader';
 import {globalfonts} from '../../styles/fonts';
 import CustomButton from '../../globalComponents/CustomButton';
 import {useState} from 'react';
 import {useEffect} from 'react';
-import OTPInputView from '@twotalltotems/react-native-otp-input';
-import { useNavigation } from '@react-navigation/native';
+import OTPTextInput from 'react-native-otp-textinput';
+import auth from '@react-native-firebase/auth';
+import {useNavigation, useRoute} from '@react-navigation/native';
+import {useDispatch} from 'react-redux';
+import {setIsLoggedIn} from '../../store/slices';
+import FirebaseErrorHander from '../../utils/FirebaseErrorHander';
 globalfonts;
 const OtpVerification = () => {
-  // const dispatch = useDispatch();
+  let otpInput = useRef(null);
 
-  // // get values from params
-  // const route = useRoute();
-  // const routeValues = route.params;
+  const clearText = () => {
+    otpInput.current.clear();
+  };
+
+  // const setText = () => {
+  //     otpInput.current.setValue("1234");
+  // }
+
+  const dispatch = useDispatch();
+
+  // get values from params
+  const route = useRoute();
+  const routeValues = route.params;
 
   // // for navigation
   const navigation = useNavigation();
 
-  // // to store firebase confirmation
-  // const [Confirmation, setConfirmation] = useState();
-  // // used to set confirmUser params to confirmationstate
-  // useEffect(() => {
-  //   setConfirmation(routeValues.confirmUser);
-  // }, []);
+  // to store firebase confirmation
+  const [Confirmation, setConfirmation] = useState();
+  // used to set confirmUser params to confirmationstate
+  useEffect(() => {
+    setConfirmation(routeValues.confirmUser);
+  }, []);
 
   // loading sate for button
   const [loading, setLoading] = useState(false);
@@ -34,13 +48,6 @@ const OtpVerification = () => {
 
   // state for otp error
   const [authError, setAuthError] = useState();
-
-  const {screenWidth} = useScreenDimensions();
-
-  // back function to go back
-  const backFunction = () => {
-    navigation.goBack();
-  };
 
   // function for validate otp . it return boolean. if it valid return true else false
   const validateOTP = code => {
@@ -97,106 +104,91 @@ const OtpVerification = () => {
   // this is resend
   const resendCode = async () => {
     try {
-      // const confirmation = await auth().signInWithPhoneNumber(
-      //   routeValues.formattedValue,
-      //   true,
-      // );
+      const confirmation = await auth().signInWithPhoneNumber(
+        routeValues.formattedValue,
+        true,
+      );
       startCountdown();
-      // setConfirmation(confirmation);
-      // refetchResend();
+      clearText();
+      setCode('');
+      setConfirmation(confirmation);
     } catch (error) {
+      FirebaseErrorHander(error, 'whileSubmitPhone');
       // Handle errors while submit phone number
+      
     }
   };
   // Resend OTP functionalities end
 
-  // const verifyToken = async () => {
-  //   try {
-  //     const sendToken = await API.post('/verifyToken', null, {
-  //       headers: {
-  //         'Content-Type': 'application/x-www-form-urlencoded',
-  //       },
-  //     });
-  //     if (sendToken.status === 200) {
-  //       // check is new user or not if it new user move to register else move to dashboard
-  //       if (sendToken.data.isNewUser) {
-  //         navigation.navigate('registration', {
-  //           mobile: routeValues?.formattedValue,
-  //           countryCode: routeValues?.countryCode,
-  //         });
-  //       } else {
-  //         dispatch(setIsLoggedIn(true));
-  //       }
-  //       setLoading(false);
-  //     }
-  //   } catch (error) {
-  //     console.log('otp error', error);
-  //     setLoading(false);
-  //     AxiosErrorHandler(error);
-  //   }
-  // };
-
   //otp submit buttonPress
-  // const handlePress = async () => {
-  //   if (validateOTP(code)) {
-  //     try {
-  //       setLoading(true);
-  //         await Confirmation?.confirm(code);
-  //       verifyToken();
-  //     } catch (error) {
-  //       setLoading(false);
-  //       // Handle specific phone number OTP verification errors
-  //       FirebaseErrorHander(error, 'whileSubmitOtp');
-  //       setCode('');
-  //     }
-  //   }
-  // };
+  const handlePress = async () => {
+    if (validateOTP(code)) {
+      try {
+        setLoading(true);
+        let res = await Confirmation?.confirm(code);
+        console.log(res?.additionalUserInfo.isNewUser, 'ress');
+        if (res?.additionalUserInfo.isNewUser) {
+          navigation.navigate('register');
+        } else {
+          dispatch(setIsLoggedIn(true));
+        }
+        setLoading(false);
+      } catch (error) {
+        firebaseHandleError(error, 'whileSubmitOtp');
+        setLoading(false);
+        clearText();
+        setCode('');
+      }
+    }
+  };
 
   return (
     <RootLayout>
       <CustomHeader />
-      <View style={{paddingHorizontal: 20}}>
+      <View
+        style={{
+          paddingHorizontal: 20,
+          flex: 1,
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
         <Text style={styles.text}>Please Enter Your Verification Code.</Text>
 
-        <TouchableOpacity onPress={resendCode} disabled={isCountdownRunning}>
-          <OTPInputView
-            style={{
-              width: screenWidth / 1.15,
-              height: 50,
-              marginTop: screenWidth / 4,
-            }}
-            pinCount={6}
-            code={code}
-            onCodeChanged={code => {
-              validateOTP(code);
-            }}
-            autoFocusOnLoad={false}
-            editable={true}
-            keyboardType="number-pad"
-            codeInputFieldStyle={styles.codeInputFieldStyle}
-            codeInputHighlightStyle={styles.underlineStyleHighLighted}
-            onCodeFilled={i => {
-              setCode(i);
-            }}
-          />
+        <OTPTextInput
+          containerStyle={{marginBottom: 20}}
+          textInputStyle={{fontSize: 17}}
+          tintColor="#9AE16C"
+          autoFocus={true}
+          handleTextChange={code => {
+            validateOTP(code);
+          }}
+          inputCount={6}
+          ref={e => (otpInput = e)}
+        />
 
-          <Text style={styles.resendText}>
-            Resend Code
-            {isCountdownRunning
-              ? ` 00: ${countdown < 10 ? '0' + countdown : countdown}`
-              : null}
-          </Text>
-        </TouchableOpacity>
-
-        {/* {authError && (
-          <Text className="text-red-500 px-5 pl-7 text-sm">{authError}</Text>
-        )} */}
-
+        <View
+          style={{
+            width: '100%',
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            marginBottom: '10%',
+          }}>
+          <TouchableOpacity onPress={resendCode} disabled={isCountdownRunning}>
+            <Text style={styles.resendText}>
+              Resend Code
+              {isCountdownRunning
+                ? ` 00: ${countdown < 10 ? '0' + countdown : countdown}`
+                : null}
+            </Text>
+          </TouchableOpacity>
+          {authError ? <Text style={styles.error}>{authError}</Text> : null}
+        </View>
         {/* submit button */}
         <CustomButton
-          // isLoading={loading}
+          isLoading={loading}
           title="Done"
-          // onPress={handlePress}
+          onPress={handlePress}
           backgroundColor="#427594"
           textSize={17}
         />
@@ -209,32 +201,24 @@ export default OtpVerification;
 
 const styles = StyleSheet.create({
   text: {
-    marginTop: 10,
-    marginBottom: 3,
+    marginBottom: '20%',
     fontWeight: '600',
     color: 'black',
     fontSize: 20,
     ...globalfonts.medium,
   },
   resendText: {
-    paddingHorizontal: 20,
-    textAlign: 'right',
-    paddingRight: 6,
-    marginTop: 2,
+    // paddingHorizontal: 20,
+    // paddingRight: 6,
+    // marginTop: 2,
     fontSize: 12,
     color: 'gray',
   },
-  underlineStyleHighLighted: {
-    borderColor: "yellow",
-  },
-  codeInputFieldStyle: {
-    width: 50,
-    height: 50,
-    borderWidth: 1,
-    borderColor: "red",
-    borderRadius: 10,
-    backgroundColor: "#fff",
-    ...globalfonts.semi_bold,
-    color: "pink",
+
+  error: {
+    fontSize: 10,
+    marginTop: 5,
+    color: '#C61F1F',
+    ...globalfonts.medium,
   },
 });

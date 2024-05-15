@@ -17,7 +17,7 @@ const PhoneInputView = props => {
           defaultValue={props.defaultValue} // default value
           defaultCode={props.defaultCode} // default country Code
           value={props.value}
-          layout="first" // first & second
+          // layout="first" // first & second
           withShadow={props.withShadow}
           autoFocus={props.autoFocus}
           onChangeText={props.onChangeText}
@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     position: 'relative',
     borderWidth: 1,
-    borderColor: '#E8E8E8',
+    borderColor: '#001C00',
     paddingRight: '10%',
   },
   codeTextStyle: {
@@ -89,8 +89,6 @@ const styles = StyleSheet.create({
     marginLeft: '-2%',
   },
   textInputStyle: {
-    borderLeftWidth: 1,
-    borderLeftColor: '#E8E8E8',
     paddingLeft: 10,
     fontSize: 15,
     ...globalfonts.medium,

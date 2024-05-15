@@ -7,13 +7,14 @@ import {useNavigation} from '@react-navigation/native';
 import {useFormik} from 'formik';
 import * as Yup from 'yup';
 import 'yup-phone-lite';
-import { globalfonts } from '../../styles/fonts';
+import {globalfonts} from '../../styles/fonts';
+import auth from '@react-native-firebase/auth';
+import FirebaseErrorHander from '../../utils/FirebaseErrorHander';
 const Login = () => {
   // const dispatch = useDispatch();
   // loading sate for button
   const [loading, setLoading] = useState(false);
   // this state for backpress handler
-  const [isAlertOpen, setisAlertOpen] = useState(false);
   const navigation = useNavigation();
   const phoneInput = useRef(null);
   const [formattedValue, setFormattedValue] = useState('');
@@ -30,28 +31,25 @@ const Login = () => {
         .required('A phone number is required'),
     }),
     onSubmit: async () => {
-      console.log(formattedValue);
-      navigation.navigate("otp")
-      // try {
-      //   // set button loading true
-      //   setLoading(true);
-      //   // trigger the otp with phone number
-      //   const confirmation = await auth().signInWithPhoneNumber(
-      //     formattedValue,
-      //     true,
-      //   );
-      //   setLoading(false);
-      //   // navigate to otp screen
-      //   navigation.navigate('otp_verification', {
-      //     formattedValue,
-      //     confirmUser: confirmation,
-      //     countryCode: '+' + (countyDetails.callingCode?.[0] || '91'),
-      //   });
-      // } catch (error) {
-      //   setLoading(false);
-      //   // Handle errors while submit phone number
-      //   FirebaseErrorHander(error, 'whileSubmitPhone');
-      // }
+      try {
+        // set button loading true
+        setLoading(true);
+        // trigger the otp with phone number
+        const confirmation = await auth().signInWithPhoneNumber(
+          formattedValue,
+          true,
+        );
+        setLoading(false);
+        // navigate to otp screen
+        navigation.navigate('otp', {
+          formattedValue,
+          confirmUser: confirmation,
+        });
+      } catch (error) {
+        setLoading(false);
+        FirebaseErrorHander(error, 'whileSubmitPhone');
+        console.log(error);
+      }
     },
   });
   return (
@@ -111,7 +109,7 @@ export default Login;
 const styles = StyleSheet.create({
   error: {
     fontSize: 10,
-    marginTop:5,
+    marginTop: 10,
     color: '#C61F1F',
     ...globalfonts.medium,
   },
